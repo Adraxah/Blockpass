@@ -1,0 +1,27 @@
+# Blockpass 2 – Webseite und Zugangscodes laufen direkt in diesem Plugin.
+# Keine externe Webseite, Datenbank, API-Schluessel oder ChatGPT-Anmeldung noetig.
+web:
+  # 0.0.0.0: auf allen Interfaces erreichbar. Fuer Zugriff nur lokal: 127.0.0.1
+  bind-address: "0.0.0.0"
+  # Zusaetzlichen TCP-Port im Hoster-Panel / Router / Firewall freigeben!
+  # Der Web-Port muss sich vom Minecraft-Spielport unterscheiden.
+  port: 8080
+  # Optional: die fuer Spieler erreichbare URL, z. B. http://mc.example.de:8080
+  # Bei HTTPS-Reverse-Proxy dessen Adresse hier eintragen (ohne Unterpfad).
+  public-url: ""
+  # Optionales HTTPS direkt im Plugin mit eigenem gueltigen Zertifikat.
+  https:
+    enabled: false
+    keystore-file: "web.p12"
+    password-env: "BLOCKPASS_KEYSTORE_PASSWORD"
+server:
+  name: "Nürnberger.lol"
+  # Minecraft-Spieladresse, die nach erfolgreicher Freischaltung angezeigt wird.
+  address: ""
+# Aktiviert die Whitelist beim Start, ohne bestehende Eintraege zu entfernen.
+enable-whitelist: true
+
+# Admin-Login unter /admin. Passwort nur als PBKDF2-Hash gespeichert.
+admin:
+  username: "admin"
+  password-hash: "pbkdf2-sha256$210000$6c184b7a8b1705a6da0d98d073359c07$bdae0bf1442b161e091ed3c06bc8aab0be93cd5aaadb0a930b1f32e2a7a80382"

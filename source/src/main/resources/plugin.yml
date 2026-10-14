@@ -1,0 +1,15 @@
+name: Blockpass
+version: 2.0.0
+main: de.adraxah.blockpass.BlockpassPlugin
+api-version: '1.20'
+author: Adraxah
+description: Minecraft-Whitelist mit eingebauter Webseite und lokalen Einmalcodes.
+commands:
+  blockpass:
+    description: Blockpass-Webseite und Zugangscodes verwalten
+    usage: /blockpass code [Name|*] [Tage] | list | revoke <ID> | retry <ID> | status | reload
+    permission: blockpass.admin
+permissions:
+  blockpass.admin:
+    description: Webserver und Einmalcodes verwalten
+    default: op
