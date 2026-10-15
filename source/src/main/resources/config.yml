@@ -1,4 +1,4 @@
-# Blockpass 2 – Webseite und Zugangscodes laufen direkt in diesem Plugin.
+# Blockpass 3 – Whitelist UND Serverübersicht laufen in dieser einen JAR.
 # Keine externe Webseite, Datenbank, API-Schluessel oder ChatGPT-Anmeldung noetig.
 web:
   # 0.0.0.0: auf allen Interfaces erreichbar. Fuer Zugriff nur lokal: 127.0.0.1
@@ -25,3 +25,10 @@ enable-whitelist: true
 admin:
   username: "admin"
   password-hash: "pbkdf2-sha256$210000$6c184b7a8b1705a6da0d98d073359c07$bdae0bf1442b161e091ed3c06bc8aab0be93cd5aaadb0a930b1f32e2a7a80382"
+
+# Eine Webseite, ein Webserver und ein Port für Übersicht und Whitelist.
+# Übersicht: / | Whitelist: /whitelist/ | Admin: /admin und /whitelist/admin
+# Übersichtsinhalte: plugins/Blockpass/overview/content.json
+# Ohne overview.admin gilt der gemeinsame Login aus admin oben.
+# Ein abweichender alter BlockOverview-Login wird unter overview.admin übernommen.
+# Modpacks bleiben unter plugins/Blockpass/modpacks/{prism,curesforge,modrinth}/

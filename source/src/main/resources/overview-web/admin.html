@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#191d19"><meta name="robots" content="noindex,nofollow"><title>Admin · Blockpass</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/admin.js" defer></script></head>
+<body><div class="site-shell">
+<header class="topbar"><a class="button blue" href="/">← Übersicht</a><a class="brand" href="/"><img src="/favicon.svg" width="32" height="32" alt="">Blockpass</a><a class="button quiet" href="/whitelist/admin">Codes &amp; Modpacks →</a></header>
+<main>
+  <div class="admin-header"><p class="eyebrow">DEINE WELT. DEINE EINSTELLUNGEN.</p><h1>Admin-Dashboard</h1><p class="muted">Termine planen. Infos teilen. Den Überblick behalten.</p></div>
+  <section id="login-panel" class="panel login-panel"><h2>Willkommen zurück.</h2><p class="small">Melde dich an, um die Serverübersicht zu bearbeiten.</p>
+    <form id="login-form"><div class="field"><label for="username">Benutzername</label><input id="username" name="username" autocomplete="username" value="admin" required maxlength="64"></div><div class="field"><label for="password">Passwort</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256"></div><button id="login-button" class="button green" type="submit">Anmelden →</button><p id="login-message" class="feedback small" role="status"></p></form>
+  </section>
+  <section id="dashboard" hidden>
+    <div class="admin-toolbar"><p class="small" id="admin-info">Angemeldet · Änderungen werden beim Speichern veröffentlicht.</p><button id="logout" class="button quiet" type="button">Abmelden</button></div>
+    <form id="settings-form">
+      <div class="admin-grid">
+        <section class="panel"><h2>Server &amp; Texte</h2><p class="small intro">So wird dein Server auf der Übersicht vorgestellt.</p>
+          <div class="field"><label for="brand">Name im Kopfbereich</label><input id="brand" name="brand" maxlength="60" required></div>
+          <div class="field"><label for="title">Große Überschrift</label><input id="title" name="title" maxlength="80" required></div>
+          <div class="field"><label for="address">Minecraft-Serveradresse</label><input id="address" name="address" maxlength="120" placeholder="z. B. play.dein-server.de"><span class="small">Wird als kopierbare Adresse angezeigt. Leer = ausblenden.</span></div>
+        </section>
+        <section class="panel"><h2>Termine &amp; Countdowns</h2><p class="small intro">Alle Eingaben gelten in <strong>Europe/Berlin</strong>, einschließlich Sommerzeit. Ohne Datum erscheint „Termin offen“.</p>
+          <div class="field"><label for="projectStart">Projektstart / erster Serverstart</label><input id="projectStart" name="projectStart" type="datetime-local" min="2000-01-01T00:00" max="2199-12-31T23:59"><span class="small">Bleibt bei Server-Neustarts unverändert.</span><button class="button quiet" id="start-now" type="button">Aktuelle Berliner Zeit einsetzen</button></div>
+          <div class="field"><label for="netherOpen">Nether öffnet am</label><input id="netherOpen" name="netherOpen" type="datetime-local" min="2000-01-01T00:00" max="2199-12-31T23:59"></div>
+          <div class="field"><label for="endOpen">End öffnet am</label><input id="endOpen" name="endOpen" type="datetime-local" min="2000-01-01T00:00" max="2199-12-31T23:59"></div>
+          <p class="small block-note">Die Termine dienen als Ankündigung und schalten Portale nicht automatisch frei. Die Laufzeit seit dem letzten Neustart wird separat live erfasst.</p>
+        </section>
+        <section class="panel"><h2>Links &amp; Buttons</h2><p class="small intro">Map links in Blau. Die Whitelist ist über den grünen Button unter /whitelist/ auf derselben Webseite erreichbar.</p>
+          <div class="field"><label for="mapUrl">Map-Adresse</label><input id="mapUrl" name="mapUrl" type="url" maxlength="500" required></div>
+          <div class="field"><label for="discordUrl">Discord / Community-Link</label><input id="discordUrl" name="discordUrl" type="url" maxlength="500" placeholder="https://discord.gg/…"><span class="small">Optional. Leer = keinen Discord-Link anzeigen.</span></div>
+        </section>
+        <section class="panel"><h2>Ankündigung</h2><p class="small intro">Ein Hinweis direkt oberhalb der Live-Serverdaten.</p>
+          <div class="field-row"><div class="field"><label for="announcementKind">Art</label><select id="announcementKind" name="announcementKind"><option value="info">Server-News</option><option value="event">Event</option><option value="warning">Wichtiger Hinweis</option></select></div><div class="field"><label for="announcementTitle">Titel</label><input id="announcementTitle" name="announcementTitle" maxlength="100"></div></div>
+          <div class="field"><label for="announcementText">Nachricht</label><textarea id="announcementText" name="announcementText" rows="5" maxlength="1200" placeholder="Was gibt es Neues auf dem Server?"></textarea><span class="small">Leer lassen, um die Ankündigung auszublenden.</span></div>
+          <label class="check"><input id="maintenance" name="maintenance" type="checkbox"><span><strong>Wartungshinweis anzeigen</strong><small>Zeigt einen Hinweis an; Spieler können weiterhin beitreten.</small></span></label>
+        </section>
+        <section class="panel full-width"><h2>Sichtbarkeit</h2><p class="small intro">Wähle, welche Details öffentlich zu sehen sind.</p>
+          <label class="check"><input id="showPlayers" name="showPlayers" type="checkbox"><span><strong>Spielerliste anzeigen</strong><small>Die Namen der aktuell angemeldeten Spieler.</small></span></label>
+          <label class="check"><input id="showTps" name="showTps" type="checkbox"><span><strong>TPS anzeigen</strong><small>Gemessene Tickrate der letzten bis zu 60 Sekunden.</small></span></label>
+          <label class="check"><input id="showUptime" name="showUptime" type="checkbox"><span><strong>Laufzeit &amp; Neustart anzeigen</strong><small>Laufzeit und Beginn des aktuellen Serverprozesses.</small></span></label>
+          <label class="check"><input id="showTimeline" name="showTimeline" type="checkbox"><span><strong>Termine anzeigen</strong><small>Projektstart, Nether und End mit Countdown.</small></span></label>
+        </section>
+      </div>
+      <div class="savebar"><p id="save-message" class="small feedback" role="status">Noch keine Änderungen.</p><div class="save-actions"><button id="reload-content" type="button" class="button quiet">Stand laden</button><button id="save-button" type="submit" class="button green">Speichern ✓</button></div></div>
+      <p class="admin-footer-note">Gespeicherte Änderungen erscheinen automatisch auf der Übersicht. Live-Daten kommen aus dem Minecraft-Server und sind nicht manuell bearbeitbar.</p>
+    </form>
+  </section>
+</main><footer><span>Blockpass · Admin</span><a href="/">Zur öffentlichen Übersicht →</a></footer></div><noscript><p class="notice noscript">Bitte JavaScript aktivieren, um das Dashboard zu benutzen.</p></noscript></body></html>

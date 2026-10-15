@@ -35,6 +35,7 @@ public final class AdminAccess {
     public synchronized Session require(String cookie)throws AccessStore.Rejected{
         String token="";
         if(cookie!=null)for(String part:cookie.split(";")){String[] pair=part.trim().split("=",2);if(pair.length==2&&pair[0].equals("blockpass_admin"))token=pair[1];}
+        if(token.length()>=2 && token.charAt(0)=='"' && token.charAt(token.length()-1)=='"')token=token.substring(1,token.length()-1);
         Session s=sessions.get(token);
         if(s==null||s.expires()<=System.currentTimeMillis()){sessions.remove(token);throw new AccessStore.Rejected(401,"Bitte anmelden.");}
         return s;

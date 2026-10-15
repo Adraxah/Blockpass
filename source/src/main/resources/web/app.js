@@ -1,11 +1,12 @@
 'use strict';
+const basePath=document.querySelector('meta[name="blockpass-base"]').content;
 const el=id=>document.getElementById(id);
 let info=null,ticket=null,busy=false,polling=false;
 const storageKey='blockpass-v2-ticket';
 function message(id,text){el(id).textContent=text;el(id).hidden=!text;}
 function remember(value){ticket=value;try{if(value)sessionStorage.setItem(storageKey,JSON.stringify(value));else sessionStorage.removeItem(storageKey);}catch{}}
 async function api(path,data){
- const response=await fetch('/api/'+path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined,cache:'no-store',signal:AbortSignal.timeout(12000)});
+ const response=await fetch(basePath+'/api/'+path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined,cache:'no-store',signal:AbortSignal.timeout(12000)});
  const result=await response.json();if(!response.ok){const error=Error(result.error||'Anfrage fehlgeschlagen.');error.status=response.status;throw error;}return result;
 }
 function render(){
@@ -52,7 +53,7 @@ render();loadInfo();poll();setInterval(loadInfo,15000);setInterval(poll,3000);
 
 const packIds=['modrinth','prism','curseforge'];
 function showModpacks(packs){for(const id of packIds){const link=el('download-'+id),pack=packs.find(p=>p.id===id);const available=pack?.available===true;link.setAttribute('aria-disabled',String(!available));link.tabIndex=available?0:-1;
- if(available){link.href='/downloads/'+id;link.setAttribute('download',pack.filename);link.title=pack.filename;const mb=pack.size/1048576;link.querySelector('small').textContent=(pack.version?pack.version+' · ':'')+(mb>=1?mb.toLocaleString('de-DE',{maximumFractionDigits:1})+' MB':Math.max(1,Math.round(pack.size/1024))+' KB');}
+ if(available){link.href=basePath+'/downloads/'+id;link.setAttribute('download',pack.filename);link.title=pack.filename;const mb=pack.size/1048576;link.querySelector('small').textContent=(pack.version?pack.version+' · ':'')+(mb>=1?mb.toLocaleString('de-DE',{maximumFractionDigits:1})+' MB':Math.max(1,Math.round(pack.size/1024))+' KB');}
  else{link.removeAttribute('href');link.removeAttribute('download');link.removeAttribute('title');link.querySelector('small').textContent='Noch nicht verfügbar';}
 }}
 async function loadModpacks(){try{const data=await api('modpacks');showModpacks(data.packs||[]);}catch{showModpacks([]);}}

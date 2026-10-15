@@ -23,6 +23,7 @@ public final class EmbeddedWebServer implements AutoCloseable {
     private final Semaphore downloadSlots=new Semaphore(2);
     private final WhitelistService service;
     private final String serverName,serverAddress,publicOrigin;
+    private final String basePath;
     private final Map<String,byte[]> assets=new HashMap<>();
     private final RateLimiter limiter=new RateLimiter();
     private volatile boolean active=true;
@@ -41,17 +42,26 @@ public final class EmbeddedWebServer implements AutoCloseable {
         this(address,store,service,name,mcAddress,publicOrigin,tls,admin,null);
     }
     public EmbeddedWebServer(InetSocketAddress address,AccessStore store,WhitelistService service,String name,String mcAddress,String publicOrigin,SSLContext tls,AdminAccess admin,ModpackStore modpacks)throws IOException{
-        this.modpacks=modpacks;
+        this.modpacks=modpacks;this.basePath=address==null?"/whitelist":"";
         this.admin=admin;
         this.store=store;this.service=service;serverName=name;serverAddress=mcAddress;this.publicOrigin=publicOrigin;
         // Verify all assets before binding a port; a missing asset must not leak a listener.
-        for(String asset:new HashSet<>(ASSETS.values()))try(InputStream in=getClass().getResourceAsStream("/web/"+asset)){if(in==null)throw new IOException("Web-Datei fehlt: "+asset);assets.put(asset,in.readAllBytes());}
-        if(tls==null)server=HttpServer.create(address,32);else{HttpsServer secure=HttpsServer.create(address,32);secure.setHttpsConfigurator(new HttpsConfigurator(tls));server=secure;}
+        for(String asset:new HashSet<>(ASSETS.values()))try(InputStream in=getClass().getResourceAsStream("/web/"+asset)){
+            if(in==null)throw new IOException("Web-Datei fehlt: "+asset);byte[] bytes=in.readAllBytes();
+            if(asset.endsWith(".html")){
+                String html=new String(bytes,StandardCharsets.UTF_8).replace("name=\"blockpass-base\" content=\"\"","name=\"blockpass-base\" content=\""+basePath+"\"");
+                for(String file:List.of("style.css","app.js","admin.js","admin.css","favicon.svg","font.ttf","modrinth.png","curseforge.png"))html=html.replace("\"/"+file+"\"","\""+basePath+"/"+file+"\"");
+                bytes=html.getBytes(StandardCharsets.UTF_8);
+            }
+            assets.put(asset,bytes);
+        }
+        // Null address mounts this handler into the one shared HTTP listener.
+        if(address==null)server=null;else if(tls==null)server=HttpServer.create(address,32);else{HttpsServer secure=HttpsServer.create(address,32);secure.setHttpsConfigurator(new HttpsConfigurator(tls));server=secure;}
         executor=new ThreadPoolExecutor(4,8,30,TimeUnit.SECONDS,new ArrayBlockingQueue<>(32),r->{Thread t=new Thread(r,"Blockpass-http");t.setDaemon(true);return t;},new ThreadPoolExecutor.AbortPolicy());
-        watchdog.setRemoveOnCancelPolicy(true);executor.allowCoreThreadTimeOut(true);server.setExecutor(executor);server.createContext("/",this::handle);
+        watchdog.setRemoveOnCancelPolicy(true);executor.allowCoreThreadTimeOut(true);if(server!=null){server.setExecutor(executor);server.createContext("/",this::handle);}
     }
-    public void start(){server.start();}
-    public int port(){return server.getAddress().getPort();}
+    public void start(){if(server!=null)server.start();}
+    public int port(){return server==null?0:server.getAddress().getPort();}
     private void common(HttpExchange x){
         Headers h=x.getResponseHeaders();h.set("X-Content-Type-Options","nosniff");h.set("X-Frame-Options","DENY");h.set("Referrer-Policy","no-referrer");
         h.set("Content-Security-Policy","default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
@@ -77,12 +87,16 @@ public final class EmbeddedWebServer implements AutoCloseable {
         String host=x.getRequestHeaders().getFirst("Host"),scheme=x instanceof HttpsExchange?"https":"http";
         if(host==null||(!origin.equals(scheme+"://"+host)&&!origin.equals(publicOrigin)))throw new AccessStore.Rejected(403,"Fremder Ursprung.");
     }
-    private void handle(HttpExchange x)throws IOException{
+    public void handle(HttpExchange x)throws IOException{
         common(x);
-        ScheduledFuture<?> timeout=watchdog.schedule(x::close,x.getRequestURI().getRawPath().startsWith("/downloads/")?1800:15,TimeUnit.SECONDS);
+        ScheduledFuture<?> timeout=watchdog.schedule(x::close,x.getRequestURI().getRawPath().startsWith(basePath+"/downloads/")?1800:15,TimeUnit.SECONDS);
         try{
             if(!active)throw new AccessStore.Rejected(503,"Server wird neu gestartet.");
             String ip=x.getRemoteAddress().getAddress().getHostAddress(),path=x.getRequestURI().getRawPath(),method=x.getRequestMethod();
+            if(!basePath.isEmpty()){
+                if(!path.startsWith(basePath+"/"))throw new AccessStore.Rejected(404,"Nicht gefunden.");
+                path=path.substring(basePath.length());
+            }
             if(!limiter.allow("all:"+ip,180,60000))throw new AccessStore.Rejected(429,"Zu viele Anfragen. Bitte kurz warten.");
             if(ASSETS.containsKey(path)){
                 if(!Set.of("GET","HEAD").contains(method))throw new AccessStore.Rejected(405,"Methode nicht erlaubt.");
@@ -92,7 +106,7 @@ public final class EmbeddedWebServer implements AutoCloseable {
             if(path.startsWith("/api/admin/")&&admin!=null){
                 origin(x);
                 boolean secure=x instanceof HttpsExchange||publicOrigin.startsWith("https://");
-                String cookieFlags="; Path=/api/admin; HttpOnly; SameSite=Strict"+(secure?"; Secure":"");
+                String cookieFlags="; Path="+basePath+"/api/admin; HttpOnly; SameSite=Strict"+(secure?"; Secure":"");
                 if(path.equals("/api/admin/login")&&method.equals("POST")){
                     if(!limiter.allow("admin-login:"+ip,5,600000)||!limiter.allow("admin-login-global",30,60000))throw new AccessStore.Rejected(429,"Zu viele Loginversuche. Bitte zehn Minuten warten.");
                     JsonObject data=body(x);AdminAccess.Session session=admin.login(string(data,"username",64),string(data,"password",256));
@@ -125,7 +139,11 @@ public final class EmbeddedWebServer implements AutoCloseable {
                 }
                 throw new AccessStore.Rejected(404,"Nicht gefunden.");
             }
-            if(path.equals("/api/modpacks")&&method.equals("GET")){json(x,200,Map.of("packs",modpacks==null?List.of():modpacks.publicPacks()));return;}
+            if(path.equals("/api/modpacks")&&method.equals("GET")){
+                JsonArray packs=JSON.toJsonTree(modpacks==null?List.of():modpacks.publicPacks()).getAsJsonArray();
+                for(JsonElement pack:packs){JsonObject p=pack.getAsJsonObject();if(p.has("url")&&!p.get("url").getAsString().isEmpty())p.addProperty("url",basePath+p.get("url").getAsString());}
+                json(x,200,Map.of("packs",packs));return;
+            }
             if(path.startsWith("/downloads/")&&modpacks!=null){
                 if(!Set.of("GET","HEAD").contains(method))throw new AccessStore.Rejected(405,"Methode nicht erlaubt.");
                 download(x,path.substring("/downloads/".length()));return;
@@ -156,5 +174,5 @@ public final class EmbeddedWebServer implements AutoCloseable {
             while(remaining>0){buffer.clear();buffer.limit((int)Math.min(buffer.capacity(),remaining));int n=file.channel().read(buffer);if(n<0)throw new EOFException("Datei waehrend des Downloads geaendert.");if(n==0)continue;x.getResponseBody().write(buffer.array(),0,n);remaining-=n;}
         }finally{downloadSlots.release();}
     }
-    @Override public void close(){active=false;server.stop(0);executor.shutdownNow();watchdog.shutdownNow();}
+    @Override public void close(){active=false;if(server!=null)server.stop(0);executor.shutdownNow();watchdog.shutdownNow();}
 }

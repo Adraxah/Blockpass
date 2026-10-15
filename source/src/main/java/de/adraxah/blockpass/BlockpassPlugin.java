@@ -1,6 +1,7 @@
 package de.adraxah.blockpass;
 
 import com.google.gson.*;
+import de.adraxah.blockoverview.OverviewModule;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,12 +21,19 @@ public final class BlockpassPlugin extends JavaPlugin implements CommandExecutor
     private AccessStore store;
     private ModpackStore modpacks;
     private volatile EmbeddedWebServer web;
+    private OverviewModule overview;
     private WhitelistService service;
     private ExecutorService admin;
     private volatile long epoch;
     private volatile boolean running;
     private String address="";
     @Override public void onEnable(){
+        if(getServer().getPluginManager().getPlugin("BlockOverview")!=null){
+            getLogger().severe("Bitte die alte BlockOverview-JAR entfernen und neu starten. Blockpass 3 enthält bereits beide Webseiten; die Datenordner behalten.");
+            getServer().getPluginManager().disablePlugin(this);return;
+        }
+        try{if(LegacyMigration.run(getDataFolder().toPath()))getLogger().info("Bestehende Übersichtseinstellungen übernommen. Der alte Datenordner bleibt als Sicherung erhalten.");}
+        catch(Exception e){getLogger().severe("Übernahme fehlgeschlagen: "+e.getMessage());getServer().getPluginManager().disablePlugin(this);return;}
         saveDefaultConfig();
         // Existing v1 configuration receives the standalone defaults. Cloud credentials are unused.
         getConfig().options().copyDefaults(true);
@@ -41,7 +49,7 @@ public final class BlockpassPlugin extends JavaPlugin implements CommandExecutor
         catch(Exception e){getLogger().severe("Blockpass konnte nicht starten: "+e.getMessage());getServer().getPluginManager().disablePlugin(this);}
     }
     @Override public void onDisable(){stopWeb();if(admin!=null)admin.shutdownNow();}
-    private void stopWeb(){running=false;epoch++;if(web!=null){web.close();web=null;}if(service!=null){service.close();service=null;}}
+    private void stopWeb(){running=false;epoch++;if(overview!=null){overview.close();overview=null;}if(web!=null){web.close();web=null;}if(service!=null){service.close();service=null;}}
     private void configure()throws Exception{
         stopWeb();reloadConfig();
         if(!Bukkit.getOnlineMode())throw new IllegalStateException("online-mode=true erforderlich. Offline-Server und Offline-Proxy-Backends werden nicht unterstuetzt.");
@@ -86,9 +94,10 @@ public final class BlockpassPlugin extends JavaPlugin implements CommandExecutor
             }
         },message->getLogger().warning(message));
         try{
-            web=new EmbeddedWebServer(new InetSocketAddress(bind,port),store,service,serverName,serverAddress,publicOrigin,tls,new AdminAccess(getConfig().getString("admin.username","admin"),getConfig().getString("admin.password-hash","")),modpacks);web.start();service.start();
+            web=new EmbeddedWebServer(null,store,service,serverName,serverAddress,publicOrigin,tls,new AdminAccess(getConfig().getString("admin.username","admin"),getConfig().getString("admin.password-hash","")),modpacks);
+            overview=new OverviewModule(this);overview.start(web::handle,tls);service.start();
             if(getConfig().getBoolean("enable-whitelist",true))Bukkit.setWhitelist(true);
-            address=publicOrigin.isEmpty()?(tls==null?"http":"https")+"://SERVER-IP:"+port:publicOrigin;
+            address=(publicOrigin.isEmpty()?(tls==null?"http":"https")+"://SERVER-IP:"+port:publicOrigin)+"/whitelist/";
             getLogger().info("Webseite laeuft auf "+bind+":"+port+". Adresse fuer Spieler: "+address);
             getLogger().info("Zugangscode erstellen: /blockpass code [Spielername|*] [Tage]");
         }catch(Exception e){stopWeb();throw e;}
@@ -116,8 +125,8 @@ public final class BlockpassPlugin extends JavaPlugin implements CommandExecutor
         if(!sender.hasPermission("blockpass.admin")){sender.sendMessage(ChatColor.RED+"Keine Berechtigung.");return true;}
         if(args.length==0){sender.sendMessage("/blockpass code [Name|*] [Tage] | list | revoke <ID> | retry <ID> | status | reload | cleanup");return true;}
         String sub=args[0].toLowerCase(Locale.ROOT);
-        if(sub.equals("status")&&args.length==1){sender.sendMessage("Webseite: "+(running&&web!=null?address:"gestoppt")+" | Whitelist: "+Bukkit.hasWhitelist());return true;}
-        if(sub.equals("reload")&&args.length==1){try{configure();sender.sendMessage("Blockpass neu geladen: "+address);}catch(Exception e){stopWeb();getLogger().severe("Webserver konnte nicht starten: "+e.getMessage());sender.sendMessage("Webserver gestoppt. Port/Konfiguration und Serverlog pruefen, dann /blockpass reload.");}return true;}
+        if(sub.equals("status")&&args.length==1){sender.sendMessage("Whitelist: "+(running&&web!=null?address:"gestoppt")+" | Übersicht: "+(overview!=null?overview.address():"gestoppt"));return true;}
+        if(sub.equals("reload")&&args.length==1){try{configure();sender.sendMessage("Beide Webseiten neu geladen. Whitelist: "+address+" | Übersicht: "+overview.address());}catch(Exception e){stopWeb();getLogger().severe("Webserver konnten nicht starten: "+e.getMessage());sender.sendMessage("Webserver gestoppt. Ports/Konfiguration und Serverlog prüfen, dann /blockpass reload.");}return true;}
         if(sub.equals("code")){
             if(args.length>3||(args.length>=2&&!args[1].equals("*")&&!AccessStore.validName(args[1]))){sender.sendMessage("/blockpass code [Minecraft-Name|*] [Tage 1-90]");return true;}
             int days=7;try{if(args.length==3)days=Integer.parseInt(args[2]);}catch(NumberFormatException e){days=0;}final int validity=days;
