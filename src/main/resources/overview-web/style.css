@@ -69,7 +69,6 @@
 .player-overview .player{max-width:100%}
 .player-overview .player>span{overflow-wrap:anywhere;min-width:0}
 .player-overview .avatar{flex-shrink:0}
-.player-updates{margin:14px 0 0;padding-left:12px;border-left:3px solid #bba361;color:#d2c69c}
 .metrics.performance-row{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:32px}
 .metrics.performance-row:has(>.metric[hidden]){grid-template-columns:1fr}
 .metrics.performance-row:not(:has(>.metric:not([hidden]))){display:none}

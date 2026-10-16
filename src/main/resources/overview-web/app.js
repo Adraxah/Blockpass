@@ -42,8 +42,6 @@ function renderLive() {
   const playersFresh = data.playersAvailable && (paused || (fresh && now() - data.playersObservedAt < 15000));
   showText('online',playersFresh ? data.online : '—'); showText('peak-players',playersFresh ? ' / ' + data.peakPlayers : '');
   showText('peak',playersFresh ? 'Höchststand seit Serverstart: ' + data.peakPlayers : 'Keine aktuellen Spielerdaten');
-  $('player-updates').hidden = !data.playersPaused;
-  showText('player-updates',paused ? 'Spielerdaten pausiert bis ' + formatDate(data.playersResumeAt) + (playersFresh ? ' · Stand: ' + formatDate(data.playersObservedAt) : ' · Warte auf den ersten Serverstand') : 'Pause beendet. Spielerdaten werden geladen …');
   showText('tps',fresh && data.tps !== null ? data.tps.toFixed(1) : '—');
   $('tps').classList.toggle('bad-tps',fresh && data.tps !== null && data.tps < 18);
   showText('tps-caption',fresh && data.tps === null ? 'Messung startet nach einigen Sekunden' : 'Gemessene Tickrate · bis zu 60 s');

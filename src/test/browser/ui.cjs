@@ -50,8 +50,8 @@ function check(condition, label) { assert.ok(condition, label); passed++; consol
     await admin.locator('#playerPauseEnabled').check();
     await admin.locator('#playerPauseStart').fill(times[0]); await admin.locator('#playerPauseEnd').fill(times[1]);
     await admin.locator('#save-button').click(); await admin.waitForFunction(() => document.getElementById('save-message').textContent.startsWith('Gespeichert!'));
-    await overview.reload(); await overview.locator('#player-updates').waitFor({state:'visible'});
-    check((await overview.locator('#player-updates').textContent()).includes('Stand:') && await overview.locator('#player-count').textContent() === '7 IM STAND', 'frozen player data is labelled with its timestamp');
+    await overview.reload(); await overview.waitForFunction(() => document.getElementById('player-count').textContent === '7 IM STAND');
+    check(await overview.locator('#player-updates').count() === 0 && !(await overview.locator('body').innerText()).includes('Spielerdaten pausiert bis'), 'pause works without the public timestamp notice');
     await overview.evaluate(() => { window.savedPlayerNode = document.querySelector('.player'); });
     await overview.waitForTimeout(11000);
     check(await overview.evaluate(() => window.savedPlayerNode === document.querySelector('.player')), 'automatic refresh does not reload frozen player nodes or heads');
@@ -60,7 +60,7 @@ function check(condition, label) { assert.ok(condition, label); passed++; consol
     await admin.locator('#playerPauseEnabled').uncheck(); await admin.locator('#save-button').click();
     await admin.waitForFunction(() => document.getElementById('save-message').textContent.startsWith('Gespeichert!'));
     await overview.reload(); await overview.waitForFunction(() => document.getElementById('online').textContent === '7');
-    check(await overview.locator('#player-updates').isHidden() && await overview.locator('#player-count').textContent() === '7 ONLINE', 'disabling pause returns the public page to live updates');
+    check(await overview.locator('#player-count').textContent() === '7 ONLINE', 'disabling pause returns the public page to live updates');
     check(await admin.locator('#subtitle,#about,#rules,#whitelistUrl').count() === 0, 'removed overview sections cannot reappear through admin fields');
     await admin.screenshot({path:path.join(screenshotDir,'admin-desktop.png'),fullPage:true});
     await admin.locator('#title').fill('Unsere Nürnberger Welt');

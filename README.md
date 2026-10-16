@@ -1,17 +1,19 @@
-# Blockpass 3.1.0 – beide Webseiten in einem Plugin
+# Blockpass 3.1.1 – beide Webseiten in einem Plugin
 
 **Eine JAR, ein eingebauter Webserver, ein TCP-Port.** Die Serverübersicht und die Whitelist inklusive Codeverwaltung und Modpack-Downloads laufen gemeinsam auf Port **8080**. Ein bereits individuell eingestellter Blockpass-Port wird beibehalten.
 
-Version 3.1.0: „Spieler online“ zeigt aktuelle Spieler / gemessenen Höchststand statt maximaler Slots. Daneben steht „Gerade in der Welt“. Server-Performance und Laufzeit stehen unter den Terminen. Deutsche Texte und Fehlermeldungen verwenden echte Umlaute. Die Spieler-Aktualisierung pausiert standardmäßig täglich von 06:00 bis 16:00 Uhr; Zeitraum und Schalter sind im Übersichts-Admin einstellbar. Die bisherigen Animationen bleiben erhalten und berücksichtigen reduzierte Bewegung.
+Version 3.1.1: Der öffentliche Hinweis „Spielerdaten pausiert bis … · Stand: …“ ist entfernt. Die Aktualisierungspause und ihre Admin-Einstellungen bleiben aktiv.
 
-**Update von 3.0.x:** Server stoppen, bisherige Blockpass-JAR durch **Blockpass-3.1.0.jar** ersetzen, Datenordner behalten und Server starten. Die neuen Pauseneinstellungen werden auch bei bestehenden Übersichtsdaten automatisch mit 06:00–16:00 Uhr vorbelegt.
+Seit Version 3.1.0: „Spieler online“ zeigt aktuelle Spieler / gemessenen Höchststand statt maximaler Slots. Daneben steht „Gerade in der Welt“. Server-Performance und Laufzeit stehen unter den Terminen. Deutsche Texte und Fehlermeldungen verwenden echte Umlaute. Die Spieler-Aktualisierung pausiert standardmäßig täglich von 06:00 bis 16:00 Uhr; Zeitraum und Schalter sind im Übersichts-Admin einstellbar. Die bisherigen Animationen bleiben erhalten und berücksichtigen reduzierte Bewegung.
+
+**Update von 3.0.x oder 3.1.0:** Server stoppen, bisherige Blockpass-JAR durch **Blockpass-3.1.1.jar** ersetzen, Datenordner behalten und Server starten. Die neuen Pauseneinstellungen werden auch bei bestehenden Übersichtsdaten automatisch mit 06:00–16:00 Uhr vorbelegt.
 
 ## Von Blockpass 2 und BlockOverview umsteigen
 
 1. Minecraft-Server stoppen und die bisherigen Plugin-Daten sichern.
 2. Die alten **Blockpass-2.0.0.jar** und **BlockOverview-1.0.0.jar** aus dem `plugins`-Ordner entfernen.
 3. Die Ordner **plugins/Blockpass/** und **plugins/BlockOverview/** behalten. Insbesondere `data.json`, `codes.key`, `modpacks.json` und die Modpack-Dateien nicht löschen.
-4. Nur die neue **Blockpass-3.1.0.jar** in `plugins` kopieren.
+4. Nur die neue **Blockpass-3.1.1.jar** in `plugins` kopieren.
 5. Server starten. Der bisherige Blockpass-Port bleibt aktiv; standardmäßig **8080**. Für die neue Version ist kein zweiter Web-Port nötig.
 
 Das Plugin verwendet die bestehenden Codes, deren Verschlüsselungsschlüssel und die Modpacks direkt weiter. Bisherige Übersichtsinhalte werden beim ersten Start nach `plugins/Blockpass/overview/content.json` kopiert. Die ursprünglichen BlockOverview-Dateien bleiben erhalten. Die bisherige Blockpass-Konfiguration wird vor einem Import unter `plugins/Blockpass/migration-backup/config.before-3.yml` gesichert. Ein erneuter Start überschreibt keine bereits importierten und danach bearbeiteten Übersichtsinhalte.
@@ -57,7 +59,7 @@ Unter **/admin → Spieler-Aktualisierung**:
 - **Pause ab** und **Weiter ab** legen Beginn und Ende fest. Standard: **06:00–16:00 Uhr**, täglich in **Europe/Berlin** einschließlich Sommerzeit.
 - Auch Zeiträume über Mitternacht funktionieren, zum Beispiel 22:00–08:00 Uhr. Beginn und Ende müssen unterschiedlich sein.
 
-Während der Pause bleiben Spielerzahl, angezeigter Höchststand und Spielerliste einschließlich Skin-Köpfen auf dem letzten Stand. Die Webseite kennzeichnet den Zeitpunkt und das Ende der Pause. Neuladen oder ein anderer Browser erhält denselben eingefrorenen Stand. TPS, Laufzeit, Status und Termine laufen weiter. Ab dem Ende kommen wieder aktuelle Spielerdaten; eine bereits offene Webseite übernimmt Änderungen normalerweise innerhalb von zehn Sekunden.
+Während der Pause bleiben Spielerzahl, angezeigter Höchststand und Spielerliste einschließlich Skin-Köpfen auf dem letzten Stand. Der zusätzliche Hinweis mit Pausenende und Zeitstempel wird auf der Webseite nicht mehr angezeigt. Neuladen oder ein anderer Browser erhält denselben eingefrorenen Stand. TPS, Laufzeit, Status und Termine laufen weiter. Ab dem Ende kommen wieder aktuelle Spielerdaten; eine bereits offene Webseite übernimmt Änderungen normalerweise innerhalb von zehn Sekunden.
 
 Die Pause wird im Plugin umgesetzt, auch ohne geöffnete Webseite. Der tatsächliche Spieler-Höchststand wird währenddessen weiter erfasst und nach der Pause wieder angezeigt. Seine bisherige Zählweise bleibt unverändert: Er wird beim Start bzw. Neuladen des Moduls neu erfasst; es handelt sich nicht um ein dauerhaft gespeichertes Allzeitmaximum. Der gewünschte Anzeigetext lautet weiterhin „Höchststand seit Serverstart“.
 
@@ -96,7 +98,7 @@ Nach Konfigurationsänderungen: **/blockpass reload**. Beide Seiten werden zusam
 
 ## Quellcode und eigene Änderungen
 
-Den Ordner **source** als Maven-Projekt in IntelliJ öffnen und `mvn clean package` ausführen. Die fertige JAR liegt unter `source/target/Blockpass-3.1.0.jar`.
+Den Ordner **source** als Maven-Projekt in IntelliJ öffnen und `mvn clean package` ausführen. Die fertige JAR liegt unter `source/target/Blockpass-3.1.1.jar`.
 
 - Whitelist-Webseite: `source/src/main/resources/web/`
 - Übersicht und deren Adminseite: `source/src/main/resources/overview-web/`
@@ -107,7 +109,7 @@ Die Dateien beider Webseiten sind in der JAR enthalten. Nach Änderungen neu bau
 Ein neues Admin-Passwort kann mit dem enthaltenen Terminalwerkzeug gehasht werden:
 
 ```powershell
-java -cp .\Blockpass-3.1.0.jar de.adraxah.blockoverview.PasswordHash
+java -cp .\Blockpass-3.1.1.jar de.adraxah.blockoverview.PasswordHash
 ```
 
 Den ausgegebenen Prüfwert bei `admin.password-hash` und gegebenenfalls `overview.admin.password-hash` eintragen, anschließend neu laden. Das Passwort wird verdeckt abgefragt und nicht als Befehlsargument übergeben.
