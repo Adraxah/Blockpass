@@ -1,15 +1,17 @@
-# Blockpass 3.0.3 – beide Webseiten in einem Plugin
+# Blockpass 3.1.0 – beide Webseiten in einem Plugin
 
 **Eine JAR, ein eingebauter Webserver, ein TCP-Port.** Die Serverübersicht und die Whitelist inklusive Codeverwaltung und Modpack-Downloads laufen gemeinsam auf Port **8080**. Ein bereits individuell eingestellter Blockpass-Port wird beibehalten.
 
-Version 3.0.3: „DEINE SERVERÜBERSICHT“ entfernt. Der Servertitel bekommt eine dezente schwebende Pixelanimation. Wolken, Sterne und kleine Leuchtpunkte beleben die Landschaft; Karten und Buttons reagieren sanft auf die Maus. Die Einstellung für reduzierte Bewegung wird berücksichtigt. Beim Update einer älteren 3.0-Version nur die JAR bei gestopptem Server austauschen; Datenordner behalten.
+Version 3.1.0: „Spieler online“ zeigt aktuelle Spieler / gemessenen Höchststand statt maximaler Slots. Daneben steht „Gerade in der Welt“. Server-Performance und Laufzeit stehen unter den Terminen. Deutsche Texte und Fehlermeldungen verwenden echte Umlaute. Die Spieler-Aktualisierung pausiert standardmäßig täglich von 06:00 bis 16:00 Uhr; Zeitraum und Schalter sind im Übersichts-Admin einstellbar. Die bisherigen Animationen bleiben erhalten und berücksichtigen reduzierte Bewegung.
+
+**Update von 3.0.x:** Server stoppen, bisherige Blockpass-JAR durch **Blockpass-3.1.0.jar** ersetzen, Datenordner behalten und Server starten. Die neuen Pauseneinstellungen werden auch bei bestehenden Übersichtsdaten automatisch mit 06:00–16:00 Uhr vorbelegt.
 
 ## Von Blockpass 2 und BlockOverview umsteigen
 
 1. Minecraft-Server stoppen und die bisherigen Plugin-Daten sichern.
 2. Die alten **Blockpass-2.0.0.jar** und **BlockOverview-1.0.0.jar** aus dem `plugins`-Ordner entfernen.
 3. Die Ordner **plugins/Blockpass/** und **plugins/BlockOverview/** behalten. Insbesondere `data.json`, `codes.key`, `modpacks.json` und die Modpack-Dateien nicht löschen.
-4. Nur die neue **Blockpass-3.0.3.jar** in `plugins` kopieren.
+4. Nur die neue **Blockpass-3.1.0.jar** in `plugins` kopieren.
 5. Server starten. Der bisherige Blockpass-Port bleibt aktiv; standardmäßig **8080**. Für die neue Version ist kein zweiter Web-Port nötig.
 
 Das Plugin verwendet die bestehenden Codes, deren Verschlüsselungsschlüssel und die Modpacks direkt weiter. Bisherige Übersichtsinhalte werden beim ersten Start nach `plugins/Blockpass/overview/content.json` kopiert. Die ursprünglichen BlockOverview-Dateien bleiben erhalten. Die bisherige Blockpass-Konfiguration wird vor einem Import unter `plugins/Blockpass/migration-backup/config.before-3.yml` gesichert. Ein erneuter Start überschreibt keine bereits importierten und danach bearbeiteten Übersichtsinhalte.
@@ -43,9 +45,23 @@ Bestehende Blockpass-Anmeldedaten aus `admin` bleiben erhalten. Ein bisher separ
 
 Die Spielerliste zeigt den Kopf des Spieler-Skins einschließlich Hut-/Helmebene statt Initialen. Das Plugin liest die UUID und die Skin-Texturadresse aus dem Profil des angemeldeten Minecraft-Spielers. Es lädt die Textur im Hintergrund vom offiziellen Minecraft-Texturserver, erstellt das Kopfbild und liefert es über dieselbe Webseite aus. Der Browser muss keinen fremden Avatar-Dienst aufrufen.
 
-Während des Ladens oder bei einer nicht verfügbaren Textur erscheint ein lokaler Pixelkopf als Ersatz. Funktionierende Köpfe werden zwischengespeichert. Skin-Änderungen im Spielerprofil werden beim nächsten Snapshot erkannt. Ausgeblendete oder nicht mehr online befindliche Spieler erhalten keinen öffentlichen Bild-Endpunkt.
+Während des Ladens oder bei einer nicht verfügbaren Textur erscheint ein lokaler Pixelkopf als Ersatz. Funktionierende Köpfe werden zwischengespeichert. Skin-Änderungen im Spielerprofil werden beim nächsten Snapshot erkannt. Öffentliche Bild-Endpunkte sind auf die angezeigte Spielerliste beschränkt. Während einer Aktualisierungspause bleiben die zu diesem Stand gehörenden Köpfe verfügbar. Bei ausgeblendeter Spielerliste sind die Bild-Endpunkte gesperrt.
 
-Erhalten bleiben: Spielerzahl und Slots, Spielerliste, TPS-Messung, Minecraft-Version, Laufzeit seit Serverstart, Projektstart, Nether-/End-Countdowns, Ankündigungen, Wartungshinweis, kopierbare Serveradresse und optionaler Discord-Link. Zeiten gelten in **Europe/Berlin**. Nether-/End-Termine sind Ankündigungen; sie verändern keine Portale. Der Wartungshinweis sperrt keine Spieler aus.
+Erhalten bleiben: Spielerzahl und gemessener Höchststand, Spielerliste, TPS-Messung, Minecraft-Version, Laufzeit seit Serverstart, Projektstart, Nether-/End-Countdowns, Ankündigungen, Wartungshinweis, kopierbare Serveradresse und optionaler Discord-Link. Zeiten gelten in **Europe/Berlin**. Nether-/End-Termine sind Ankündigungen; sie verändern keine Portale. Der Wartungshinweis sperrt keine Spieler aus.
+
+## Spieler-Aktualisierung pausieren
+
+Unter **/admin → Spieler-Aktualisierung**:
+
+- **Aktualisierung täglich pausieren** schaltet die Pause ein oder aus.
+- **Pause ab** und **Weiter ab** legen Beginn und Ende fest. Standard: **06:00–16:00 Uhr**, täglich in **Europe/Berlin** einschließlich Sommerzeit.
+- Auch Zeiträume über Mitternacht funktionieren, zum Beispiel 22:00–08:00 Uhr. Beginn und Ende müssen unterschiedlich sein.
+
+Während der Pause bleiben Spielerzahl, angezeigter Höchststand und Spielerliste einschließlich Skin-Köpfen auf dem letzten Stand. Die Webseite kennzeichnet den Zeitpunkt und das Ende der Pause. Neuladen oder ein anderer Browser erhält denselben eingefrorenen Stand. TPS, Laufzeit, Status und Termine laufen weiter. Ab dem Ende kommen wieder aktuelle Spielerdaten; eine bereits offene Webseite übernimmt Änderungen normalerweise innerhalb von zehn Sekunden.
+
+Die Pause wird im Plugin umgesetzt, auch ohne geöffnete Webseite. Der tatsächliche Spieler-Höchststand wird währenddessen weiter erfasst und nach der Pause wieder angezeigt. Seine bisherige Zählweise bleibt unverändert: Er wird beim Start bzw. Neuladen des Moduls neu erfasst; es handelt sich nicht um ein dauerhaft gespeichertes Allzeitmaximum. Der gewünschte Anzeigetext lautet weiterhin „Höchststand seit Serverstart“.
+
+Die Einstellungen bleiben in `plugins/Blockpass/overview/content.json` erhalten. Änderungen im Adminbereich benötigen keinen Neustart. Bei einem Server- oder Plugin-Neustart während der Pause wird einmal der erste verfügbare Minecraft-Stand aufgenommen und bis zum Ende der Pause beibehalten; der eingefrorene Spielerstand selbst wird nicht auf Festplatte gespeichert. Die Pause beeinflusst weder Minecraft-Spieler noch die Whitelist.
 
 ## Whitelist und Modpacks
 
@@ -80,7 +96,7 @@ Nach Konfigurationsänderungen: **/blockpass reload**. Beide Seiten werden zusam
 
 ## Quellcode und eigene Änderungen
 
-Den Ordner **source** als Maven-Projekt in IntelliJ öffnen und `mvn clean package` ausführen. Die fertige JAR liegt unter `source/target/Blockpass-3.0.3.jar`.
+Den Ordner **source** als Maven-Projekt in IntelliJ öffnen und `mvn clean package` ausführen. Die fertige JAR liegt unter `source/target/Blockpass-3.1.0.jar`.
 
 - Whitelist-Webseite: `source/src/main/resources/web/`
 - Übersicht und deren Adminseite: `source/src/main/resources/overview-web/`
@@ -91,7 +107,7 @@ Die Dateien beider Webseiten sind in der JAR enthalten. Nach Änderungen neu bau
 Ein neues Admin-Passwort kann mit dem enthaltenen Terminalwerkzeug gehasht werden:
 
 ```powershell
-java -cp .\Blockpass-3.0.3.jar de.adraxah.blockoverview.PasswordHash
+java -cp .\Blockpass-3.1.0.jar de.adraxah.blockoverview.PasswordHash
 ```
 
 Den ausgegebenen Prüfwert bei `admin.password-hash` und gegebenenfalls `overview.admin.password-hash` eintragen, anschließend neu laden. Das Passwort wird verdeckt abgefragt und nicht als Befehlsargument übergeben.
@@ -100,6 +116,6 @@ Den ausgegebenen Prüfwert bei `admin.password-hash` und gegebenenfalls `overvie
 
 Java-Plugin für klassische Paper-/Spigot-Server, kompiliert für Java 17 gegen die Spigot-API 1.20.4. Verwende die Java-Version, die deine Minecraft-Version benötigt. `online-mode=true` ist für die sichere Whitelist-Namensprüfung erforderlich. Kein Vanilla-, Forge-, Fabric-, Proxy- oder Folia-Plugin.
 
-188 Backend-Prüfungen und 26 Browserprüfungen bestanden. Die Tests verwenden echte HTTP-Anfragen, Dateien und PNG-Verarbeitung sowie Chromium für die Browserabläufe. Minecraft-Spielerdaten, Skin-Downloads und die eigentliche Minecraft-Whitelist-Schnittstelle werden im Test simuliert. Ein Test auf einem tatsächlich laufenden Minecraft-Server steht noch aus. Testquellcode liegt unter `source/src/test/`; die Java-Testprogramme lassen sich in IntelliJ mit dem Testklassenpfad ausführen und sind keine automatisch erkannten JUnit-Tests. Die Browserprüfung verwendet Playwright und den enthaltenen `PreviewServer` mit Testdaten.
+221 Backend-Prüfungen und 33 Browserprüfungen bestanden. Die Tests verwenden echte HTTP-Anfragen, Dateien und PNG-Verarbeitung sowie Chromium für die Browserabläufe. Minecraft-Spielerdaten, Skin-Downloads und die eigentliche Minecraft-Whitelist-Schnittstelle werden im Test simuliert. Ein Test auf einem tatsächlich laufenden Minecraft-Server steht noch aus. Testquellcode liegt unter `source/src/test/`; die Java-Testprogramme lassen sich in IntelliJ mit dem Testklassenpfad ausführen und sind keine automatisch erkannten JUnit-Tests. Die Browserprüfung verwendet Playwright und den enthaltenen `PreviewServer` mit Testdaten.
 
 Schrift: Silkscreen, SIL Open Font License; Lizenzdateien liegen bei den jeweiligen Webressourcen.

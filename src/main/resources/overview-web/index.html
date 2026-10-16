@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#191d19"><title>Serverübersicht · Nürnberger.lol</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body class="overview-page">
+<a class="skip-link" href="#main">Zum Inhalt</a>
+<div class="site-shell">
+  <header class="topbar">
+    <a id="map-link" class="button blue" href="https://map.xn--nrnberger-q9a.lol/" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">▧</span> Map</a>
+    <a class="brand" href="/" aria-label="Serverübersicht"><img src="/favicon.svg" width="32" height="32" alt=""><span id="brand">Nürnberger.lol</span></a>
+    <a id="whitelist-link" class="button green" href="/whitelist/">White liste dich jetzt <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy"><h1 id="server-title">Azubi 2026<br>Server</h1>
+        <div class="hero-actions"><button id="copy-address" class="address-button" type="button" hidden><span class="tiny">SERVERADRESSE</span><span id="address"></span><span class="copy-icon" aria-hidden="true">▣</span></button><a id="discord-link" class="text-link" hidden target="_blank" rel="noopener noreferrer">Zum Discord ↗</a></div>
+        <p id="copy-feedback" class="small feedback" role="status"></p>
+      </div>
+      <div class="world-art" aria-hidden="true"><span class="moon"></span><span class="star s1"></span><span class="star s2"></span><span class="star s3"></span><span class="cloud c1"></span><span class="cloud c2"></span><span class="mountain far"></span><span class="mountain near"></span><span class="tree t1"><i></i></span><span class="tree t2"><i></i></span><span class="ground"></span><span class="firefly f1"></span><span class="firefly f2"></span><span class="firefly f3"></span><span class="world-label">OVERWORLD · NÜRNBERG</span></div>
+    </section>
+    <div class="status-line"><span class="status-badge" id="status-badge"><i class="dot"></i><span id="server-status">Verbinde …</span></span><span class="status-details"><span id="mc-version" class="small">Minecraft Java</span><span id="updated" class="small">Live-Daten werden geladen</span></span></div>
+    <p id="connection-error" class="notice error" role="status" hidden></p>
+    <div id="maintenance" class="notice warning" hidden><strong>Wartung angekündigt</strong><span>Beachte die aktuellen Hinweise des Serverteams.</span></div>
+    <section id="announcement" class="notice announcement" hidden><span id="announcement-kind" class="eyebrow">SERVER-NEWS</span><h2 id="announcement-title"></h2><p id="announcement-text" class="preserve-lines"></p></section>
+    <section class="player-overview" aria-label="Spieler auf dem Server">
+      <article class="panel metric" id="online-card"><span class="metric-symbol" aria-hidden="true">♟</span><p class="eyebrow">SPIELER ONLINE</p><p class="metric-value"><span id="online">—</span><span id="peak-players" class="metric-denominator"></span></p><p class="small" id="peak">Warte auf Serverdaten</p></article>
+      <section id="players-section" class="panel content-panel"><div class="section-heading"><h2>Gerade in der Welt</h2><span id="player-count" class="tag">—</span></div><p id="players-empty" class="muted">Spielerliste wird geladen …</p><ul id="players" class="players" aria-label="Spieler online"></ul></section>
+    </section>
+    <p id="player-updates" class="small player-updates" role="status" hidden></p>
+    <section id="timeline-section" class="section">
+      <div class="section-heading"><h2>Termine</h2></div>
+      <div class="milestones">
+        <article class="panel milestone overworld"><div class="milestone-head"><span class="dimension-icon grass" aria-hidden="true"></span><span class="tag" id="projectStart-tag">TERMIN OFFEN</span></div><h3>Serverstart</h3><p class="small">Start unserer gemeinsamen Welt</p><p class="milestone-date" id="projectStart-date">Noch nicht festgelegt</p><p class="countdown" id="projectStart-countdown">Wird bald angekündigt</p></article>
+        <article class="panel milestone nether"><div class="milestone-head"><span class="dimension-icon fire" aria-hidden="true"></span><span class="tag" id="netherOpen-tag">TERMIN OFFEN</span></div><h3>Nether öffnet</h3><p class="small">Bereit für die nächste Dimension?</p><p class="milestone-date" id="netherOpen-date">Noch nicht festgelegt</p><p class="countdown" id="netherOpen-countdown">Wird bald angekündigt</p></article>
+        <article class="panel milestone end"><div class="milestone-head"><span class="dimension-icon portal" aria-hidden="true"></span><span class="tag" id="endOpen-tag">TERMIN OFFEN</span></div><h3>End öffnet</h3><p class="small">Das nächste große Abenteuer wartet</p><p class="milestone-date" id="endOpen-date">Noch nicht festgelegt</p><p class="countdown" id="endOpen-countdown">Wird bald angekündigt</p></article>
+      </div>
+      <p class="small section-note">Die Termine werden vom Serverteam angekündigt.</p>
+    </section>
+    <section class="metrics performance-row" aria-label="Server-Performance und Laufzeit">
+      <article class="panel metric" id="tps-card"><span class="metric-symbol" aria-hidden="true">ϟ</span><p class="eyebrow">SERVER-PERFORMANCE</p><p class="metric-value"><span id="tps">—</span><span class="metric-denominator"> TPS</span></p><p class="small" id="tps-caption">Gemessene Tickrate · bis zu 60 s</p></article>
+      <article class="panel metric" id="uptime-card"><span class="metric-symbol" aria-hidden="true">◷</span><p class="eyebrow">SEIT DEM NEUSTART</p><p class="metric-value uptime" id="uptime">—</p><p class="small" id="last-restart">Warte auf Serverdaten</p></article>
+    </section>
+  </main>
+  <footer><span><img src="/favicon.svg" width="18" height="18" alt=""> <span id="footer-brand">Nürnberger.lol</span></span><span class="footer-right">Blockpass</span></footer>
+</div>
+<noscript><p class="notice">Bitte JavaScript aktivieren, um Live-Daten und Termine zu sehen.</p></noscript>
+</body></html>
